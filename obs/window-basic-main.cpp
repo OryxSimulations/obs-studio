@@ -51,6 +51,10 @@
 
 #include <fstream>
 #include <sstream>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <signal.h>
 
 #include <QScreen>
 #include <QWindow>
@@ -63,6 +67,20 @@ Q_DECLARE_METATYPE(OBSScene);
 Q_DECLARE_METATYPE(OBSSceneItem);
 Q_DECLARE_METATYPE(OBSSource);
 Q_DECLARE_METATYPE(obs_order_movement);
+
+int OBSBasic::sigtermFd[2] = {-1, -1};
+
+
+static void setup_unix_signal_handlers()
+{
+	struct sigaction term;
+
+	term.sa_handler = OBSBasic::termSignalHandler;
+	sigemptyset(&term.sa_mask);
+	term.sa_flags |= SA_RESTART;
+
+	sigaction(SIGTERM, &term, 0);
+}
 
 static void AddExtraModulePaths()
 {
@@ -83,6 +101,15 @@ OBSBasic::OBSBasic(QWidget *parent)
 	: OBSMainWindow  (parent),
 	  ui             (new Ui::OBSBasic)
 {
+	// Setup signal handlers
+	if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sigtermFd))
+		qFatal("Couldn't create TERM socketpair");
+
+	snTerm = new QSocketNotifier(sigtermFd[1], QSocketNotifier::Read, this);
+	connect(snTerm, SIGNAL(activated(int)), this, SLOT(handleSigTerm()));
+
+	setup_unix_signal_handlers();
+
 	ui->setupUi(this);
 	ui->previewDisabledLabel->setVisible(false);
 
@@ -629,7 +656,11 @@ void OBSBasic::OBSInit()
 		throw "Failed to get scenes.json file path";
 
 	/* make sure it's fully displayed before doing any initialization */
-	show();
+	if (QApplication::arguments().contains("--start-minimized"))
+		showMinimized();
+	else
+		show();
+
 	App()->processEvents();
 
 	if (!obs_startup(App()->GetLocale()))
@@ -684,6 +715,9 @@ void OBSBasic::OBSInit()
 	if (!previewEnabled)
 		QMetaObject::invokeMethod(this, "TogglePreview",
 				Qt::QueuedConnection);
+
+	if (QApplication::arguments().contains("--start"))
+		QTimer::singleShot(100, this, SLOT(StartRecording()));
 }
 
 void OBSBasic::InitHotkeys()
@@ -3139,3 +3173,22 @@ void OBSBasic::OpenSceneProjector()
 
 	OpenProjector(obs_scene_get_source(scene), monitor);
 }
+
+void OBSBasic::termSignalHandler(int)
+{
+	char a = 1;
+	::write(sigtermFd[0], &a, sizeof(a));
+}
+
+void OBSBasic::handleSigTerm()
+{
+	snTerm->setEnabled(false);
+	char tmp;
+	::read(sigtermFd[1], &tmp, sizeof(tmp));
+
+	StopRecording();
+	close();
+
+	snTerm->setEnabled(true);
+}
+

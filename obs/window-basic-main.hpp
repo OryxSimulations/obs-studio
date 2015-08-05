@@ -20,6 +20,7 @@
 #include <QNetworkAccessManager>
 #include <QBuffer>
 #include <QAction>
+#include <QSocketNotifier>
 #include <obs.hpp>
 #include <unordered_map>
 #include <vector>
@@ -189,6 +190,7 @@ private slots:
 	void ReorderSources(OBSScene scene);
 
 	void ProcessHotkey(obs_hotkey_id id, bool pressed);
+	void handleSigTerm();
 
 private:
 	/* OBS Callbacks */
@@ -354,7 +356,10 @@ public:
 	virtual void OBSInit() override;
 
 	virtual config_t *Config() const override;
+	static void termSignalHandler(int unused);
 
 private:
 	std::unique_ptr<Ui::OBSBasic> ui;
+	QSocketNotifier * snTerm;
+	static int sigtermFd[2];
 };
