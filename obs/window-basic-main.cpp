@@ -649,17 +649,31 @@ void OBSBasic::ResetOutputs()
 
 void OBSBasic::OBSInit()
 {
-	char savePath[512];
-	int ret = os_get_config_path(savePath, sizeof(savePath),
+	QStringList const arguments = QApplication::arguments();
+
+	QByteArray savePath;
+	savePath.reserve(512);
+
+	int ret = os_get_config_path(savePath.data(), savePath.capacity(),
 			"obs-studio/basic/scenes.json");
 	if (ret <= 0)
 		throw "Failed to get scenes.json file path";
 
 	/* make sure it's fully displayed before doing any initialization */
-	if (QApplication::arguments().contains("--start-minimized"))
+	if (arguments.contains("--start-minimized"))
 		showMinimized();
 	else
 		show();
+
+	int index = arguments.lastIndexOf("--scene");
+	if (index >= 0 && index + 1 < arguments.size())
+	{
+		savePath = arguments[index + 1].toLocal8Bit();
+		if (!os_file_exists(savePath.data()))
+		{
+			throw "Can not find file (file specified with --scene argument)";
+		}
+	}
 
 	App()->processEvents();
 
@@ -700,7 +714,7 @@ void OBSBasic::OBSInit()
 
 	InitPrimitives();
 
-	Load(savePath);
+	Load(savePath.data());
 	ResetAudioDevices();
 
 	TimedCheckForUpdates();
@@ -716,7 +730,7 @@ void OBSBasic::OBSInit()
 		QMetaObject::invokeMethod(this, "TogglePreview",
 				Qt::QueuedConnection);
 
-	if (QApplication::arguments().contains("--start"))
+	if (arguments.contains("--start"))
 		QTimer::singleShot(100, this, SLOT(StartRecording()));
 }
 
