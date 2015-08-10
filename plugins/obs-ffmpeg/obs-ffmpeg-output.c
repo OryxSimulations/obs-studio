@@ -15,6 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
+#include <time.h>
+
 #include <obs-module.h>
 #include <util/circlebuf.h>
 #include <util/threading.h>
@@ -91,6 +93,8 @@ struct ffmpeg_output {
 	pthread_t          write_thread;
 	os_sem_t           *write_sem;
 	os_event_t         *stop_event;
+
+	FILE               *timestamp_file;
 
 	DARRAY(AVPacket)   packets;
 };
@@ -576,6 +580,40 @@ static void receive_video(void *param, struct video_data *frame)
 	struct ffmpeg_output *output = param;
 	struct ffmpeg_data   *data   = &output->ff_data;
 
+	if (output->timestamp_file)
+	{
+		struct tm tm_time;
+
+		struct timespec clock;
+		if (clock_gettime(CLOCK_REALTIME, &clock) != -1)
+		{
+			gmtime_r(&clock.tv_sec, &tm_time);
+		}
+
+//2013.07.01_21.22.37.463
+		if (fprintf(output->timestamp_file,
+								"%d." //year
+								"%02d." //month
+								"%02d_" //day
+								"%02d." //hour
+								"%02d." //min
+								"%02d." //sec
+								"%03ld\n", //msec
+								tm_time.tm_year + 1900,
+								tm_time.tm_mon + 1,
+								tm_time.tm_mday,
+								tm_time.tm_hour,
+								tm_time.tm_min,
+								tm_time.tm_sec,
+								clock.tv_nsec/1000000) < 0)
+		{
+			const char * error_message = strerror(errno);
+			blog(LOG_ERROR, "Error writing to timestamp file: %s", error_message);
+			fclose(output->timestamp_file);
+			output->timestamp_file = NULL;
+		}
+	}
+
 	// codec doesn't support video or none configured
 	if (!data->video)
 		return;
@@ -902,6 +940,28 @@ static bool ffmpeg_output_start(void *data)
 	struct ffmpeg_output *output = data;
 	int ret;
 
+	obs_data_t * settings = obs_output_get_settings(output->output);
+	char * path = NULL;
+
+	bool create_timestamp_file = obs_data_get_bool(settings, "create_timestamp_file");
+	path = bstrdup(obs_data_get_string(settings, "url"));
+
+	const size_t path_len = strlen(path);
+	if (create_timestamp_file && path_len > 3 && path[path_len - 4] == '.')
+	{
+		// Replace extension to txt.
+		strcpy(&path[path_len - 4], ".txt");
+		output->timestamp_file = fopen(path, "w");
+		if (!output->timestamp_file)
+		{
+			const char * error_message = strerror(errno);
+			blog(LOG_WARNING, "Error opening '%s' for writing: %s",
+					 path, error_message);
+		}
+	}
+	bfree(path);
+	obs_data_release(settings);
+
 	if (output->connecting)
 		return false;
 
@@ -932,6 +992,17 @@ static void ffmpeg_output_stop(void *data)
 		pthread_mutex_unlock(&output->write_mutex);
 
 		ffmpeg_data_free(&output->ff_data);
+
+		if (output->timestamp_file && fclose(output->timestamp_file))
+		{
+			const char * error_message = strerror(errno);
+			obs_data_t * settings = obs_output_get_settings(output->output);
+			const char * path = obs_data_get_string(settings, "url");
+			blog(LOG_ERROR, "Error closing timestamp file created for '%s': %s",
+					 path, error_message);
+			obs_data_release(settings);
+		}
+		output->timestamp_file = NULL;
 	}
 }
 
