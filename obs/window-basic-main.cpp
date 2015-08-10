@@ -480,7 +480,7 @@ bool OBSBasic::InitBasicConfigDefaults()
 	uint32_t cx = monitors[0].cx;
 	uint32_t cy = monitors[0].cy;
 
-	config_set_default_string(basicConfig, "Output", "Type", "Simple");
+	config_set_default_string(basicConfig, "Output", "Mode", "Advanced");
 
 	config_set_default_string(basicConfig, "SimpleOutput", "FilePath",
 			GetDefaultVideoSavePath().c_str());
@@ -513,7 +513,7 @@ bool OBSBasic::InitBasicConfigDefaults()
 	config_set_default_uint  (basicConfig, "AdvOut", "TrackCount", 1);
 	config_set_default_string(basicConfig, "AdvOut", "Encoder", "obs_x264");
 
-	config_set_default_string(basicConfig, "AdvOut", "RecType", "Standard");
+	config_set_default_string(basicConfig, "AdvOut", "RecType", "FFmpeg");
 
 	config_set_default_string(basicConfig, "AdvOut", "RecFilePath",
 			GetDefaultVideoSavePath().c_str());
@@ -525,6 +525,13 @@ bool OBSBasic::InitBasicConfigDefaults()
 	config_set_default_uint  (basicConfig, "AdvOut", "RecTrackCount", 1);
 	config_set_default_string(basicConfig, "AdvOut", "RecEncoder",
 			"none");
+
+	config_set_default_string(basicConfig, "AdvOut", "FFFormat", "avi");
+	config_set_default_string(basicConfig, "AdvOut", "FFFormatMimeType", "video/x-msvideo");
+	config_set_default_uint  (basicConfig, "AdvOut", "FFVEncoderId", 13);
+	config_set_default_string(basicConfig, "AdvOut", "FFVEncoder", "mpeg4");
+	config_set_default_uint  (basicConfig, "AdvOut", "FFAEncoderId", 86019);
+	config_set_default_string(basicConfig, "AdvOut", "FFAEncoder", "ac3");
 
 	config_set_default_uint  (basicConfig, "AdvOut", "FFVBitrate", 2500);
 	config_set_default_bool  (basicConfig, "AdvOut", "FFUseRescale",
