@@ -974,7 +974,8 @@ OBSBasic::~OBSBasic()
 
 void OBSBasic::SaveProject()
 {
-	Save(savePath.data());
+	if (!QApplication::arguments().contains("--read-only"))
+		Save(savePath.data());
 }
 
 OBSScene OBSBasic::GetCurrentScene()

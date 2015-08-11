@@ -2080,7 +2080,8 @@ void OBSBasicSettings::SaveSettings()
 	if (videoChanged || advancedChanged)
 		main->ResetVideo();
 
-	config_save(main->Config());
+	if (!QApplication::arguments().contains("--read-only"))
+		config_save(main->Config());
 	config_save(GetGlobalConfig());
 }
 
