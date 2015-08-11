@@ -691,6 +691,18 @@ void OBSBasic::OBSInit()
 	if (!ResetAudio())
 		throw "Failed to initialize audio";
 
+	index = arguments.lastIndexOf("--output");
+	if (index >= 0 && index + 1 < arguments.size())
+	{
+		QByteArray outputFilename = arguments[index + 1].toLocal8Bit();
+		config_set_default_string(basicConfig, "AdvOut", "RecFilePath", outputFilename.data());
+		config_set_default_string(basicConfig, "AdvOut", "FFURL", outputFilename.data());
+		config_set_default_string(basicConfig, "SimpleOutput", "FilePath", outputFilename.data());
+		config_set_string(basicConfig, "AdvOut", "RecFilePath", outputFilename.data());
+		config_set_string(basicConfig, "AdvOut", "FFURL", outputFilename.data());
+		config_set_string(basicConfig, "SimpleOutput", "FilePath", outputFilename.data());
+	}
+
 	ret = ResetVideo();
 
 	switch (ret) {
