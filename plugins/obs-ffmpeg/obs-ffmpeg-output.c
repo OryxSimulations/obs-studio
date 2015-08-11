@@ -941,25 +941,19 @@ static bool ffmpeg_output_start(void *data)
 	int ret;
 
 	obs_data_t * settings = obs_output_get_settings(output->output);
-	char * path = NULL;
 
-	bool create_timestamp_file = obs_data_get_bool(settings, "create_timestamp_file");
-	path = bstrdup(obs_data_get_string(settings, "url"));
+	const char * timestamp_filename = obs_data_get_string(settings, "timestamp_filename");
 
-	const size_t path_len = strlen(path);
-	if (create_timestamp_file && path_len > 3 && path[path_len - 4] == '.')
+	if (timestamp_filename && timestamp_filename[0] != '\0')
 	{
-		// Replace extension to txt.
-		strcpy(&path[path_len - 4], ".txt");
-		output->timestamp_file = fopen(path, "w");
+		output->timestamp_file = fopen(timestamp_filename, "w");
 		if (!output->timestamp_file)
 		{
 			const char * error_message = strerror(errno);
 			blog(LOG_WARNING, "Error opening '%s' for writing: %s",
-					 path, error_message);
+					 timestamp_filename, error_message);
 		}
 	}
-	bfree(path);
 	obs_data_release(settings);
 
 	if (output->connecting)

@@ -548,7 +548,15 @@ inline void AdvancedOutput::SetupFFmpeg()
 	obs_data_t *settings = obs_data_create();
 
 	obs_data_set_string(settings, "url", url);
-	obs_data_set_bool(settings, "create_timestamp_file", QApplication::arguments().contains("--create-timestamp-file"));
+
+	QStringList const arguments = QApplication::arguments();
+	int index = arguments.lastIndexOf("--timestamp-filename");
+	if (index >= 0 && index + 1 < arguments.size())
+	{
+		QByteArray timestamp_filename = arguments[index + 1].toLocal8Bit();
+		obs_data_set_string(settings, "timestamp_filename", timestamp_filename.data());
+	}
+
 	obs_data_set_string(settings, "format_name", formatName);
 	obs_data_set_string(settings, "format_mime_type", mimeType);
 	obs_data_set_int(settings, "video_bitrate", vBitrate);
