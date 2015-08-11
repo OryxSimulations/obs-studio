@@ -582,23 +582,25 @@ bool OBSBasic::InitBasicConfigDefaults()
 	return true;
 }
 
-bool OBSBasic::InitBasicConfig()
+bool OBSBasic::LoadBasicConfig(QByteArray configPath)
 {
-	char configPath[512];
-	int ret = os_get_config_path(configPath, sizeof(configPath),
-			"obs-studio/basic/basic.ini");
-	if (ret <= 0) {
-		OBSErrorBox(nullptr, "Failed to get base.ini path");
-		return false;
+	if (configPath.isEmpty())
+	{
+		configPath.reserve(512);
+		int ret = os_get_config_path(configPath.data(), configPath.capacity(),
+				"obs-studio/basic/basic.ini");
+		if (ret <= 0) {
+			OBSErrorBox(nullptr, "Failed to get base.ini path");
+			return false;
+		}
 	}
 
-	int code = basicConfig.Open(configPath, CONFIG_OPEN_ALWAYS);
+	int code = basicConfig.Open(configPath.data(), CONFIG_OPEN_ALWAYS);
 	if (code != CONFIG_SUCCESS) {
 		OBSErrorBox(NULL, "Failed to open basic.ini: %d", code);
 		return false;
 	}
-
-	return InitBasicConfigDefaults();
+	return true;
 }
 
 void OBSBasic::InitOBSCallbacks()
@@ -682,12 +684,25 @@ void OBSBasic::OBSInit()
 		}
 	}
 
+	QByteArray basicConfigPath;
+	index = arguments.lastIndexOf("--basic-config");
+	if (index >= 0 && index + 1 < arguments.size())
+	{
+		basicConfigPath = arguments[index + 1].toLocal8Bit();
+		if (!os_file_exists(basicConfigPath.data()))
+		{
+			throw "Can not find file (file specified with --basic-config argument)";
+		}
+	}
+
 	App()->processEvents();
 
 	if (!obs_startup(App()->GetLocale()))
 		throw "Failed to initialize libobs";
-	if (!InitBasicConfig())
+	if (!LoadBasicConfig(basicConfigPath))
 		throw "Failed to load basic.ini";
+	if (!InitBasicConfigDefaults())
+		throw "Failed to init config defaults";
 	if (!ResetAudio())
 		throw "Failed to initialize audio";
 

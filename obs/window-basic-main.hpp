@@ -119,7 +119,7 @@ private:
 	bool          InitService();
 
 	bool          InitBasicConfigDefaults();
-	bool          InitBasicConfig();
+	bool          LoadBasicConfig(QByteArray filename);
 
 	void          InitOBSCallbacks();
 
