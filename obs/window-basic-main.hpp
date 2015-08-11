@@ -362,4 +362,5 @@ private:
 	std::unique_ptr<Ui::OBSBasic> ui;
 	QSocketNotifier * snTerm;
 	static int sigtermFd[2];
+	QByteArray savePath;
 };

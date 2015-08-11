@@ -660,7 +660,6 @@ void OBSBasic::OBSInit()
 {
 	QStringList const arguments = QApplication::arguments();
 
-	QByteArray savePath;
 	savePath.reserve(512);
 
 	int ret = os_get_config_path(savePath.data(), savePath.capacity(),
@@ -975,13 +974,7 @@ OBSBasic::~OBSBasic()
 
 void OBSBasic::SaveProject()
 {
-	char savePath[512];
-	int ret = os_get_config_path(savePath, sizeof(savePath),
-			"obs-studio/basic/scenes.json");
-	if (ret <= 0)
-		return;
-
-	Save(savePath);
+	Save(savePath.data());
 }
 
 OBSScene OBSBasic::GetCurrentScene()
