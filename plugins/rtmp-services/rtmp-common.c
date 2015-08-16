@@ -45,6 +45,20 @@ static void *rtmp_common_create(obs_data_t *settings, obs_service_t *service)
 	return data;
 }
 
+static char *get_service_file(void)
+{
+	char *file = obs_module_config_path("services.json");
+	if (file) {
+		if (!os_file_exists(file)) {
+			bfree(file);
+		} else {
+			return file;
+		}
+	}
+
+	return obs_module_file("services.json");
+}
+
 static inline const char *get_string_val(json_t *service, const char *key)
 {
 	json_t *str_val = json_object_get(service, key);
@@ -239,7 +253,7 @@ static obs_properties_t *rtmp_common_properties(void *unused)
 	obs_property_t   *p;
 	char             *file;
 
-	file = obs_module_file("services.json");
+	file = get_service_file();
 	if (file) {
 		json_t *root = open_json_file(file);
 		obs_properties_set_param(ppts, root, properties_data_destroy);
@@ -332,7 +346,7 @@ static void rtmp_common_apply_settings(void *data,
 	struct rtmp_common *service = data;
 	char               *file;
 
-	file = obs_module_file("services.json");
+	file = get_service_file();
 	if (file) {
 		json_t *root = open_json_file(file);
 		if (root) {
