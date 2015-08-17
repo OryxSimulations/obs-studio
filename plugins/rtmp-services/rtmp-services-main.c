@@ -29,7 +29,8 @@ bool obs_module_load(void)
 				RTMP_SERVICES_VER_STR,
 				RTMP_SERVICES_URL,
 				local_dir,
-				cache_dir);
+				cache_dir,
+				NULL, NULL);
 	}
 
 	bfree(local_dir);
