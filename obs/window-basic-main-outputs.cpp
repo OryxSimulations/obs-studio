@@ -355,12 +355,12 @@ AdvancedOutput::AdvancedOutput(OBSBasic *main_) : BasicOutputHandler(main_)
 		}
 	}
 
-	h264Streaming = obs_video_encoder_create(streamEncoder,
-			"streaming_h264", streamEncSettings, nullptr);
-	if (!h264Streaming)
-		throw "Failed to create streaming h264 encoder "
-		      "(advanced output)";
-	obs_encoder_release(h264Streaming);
+	// h264Streaming = obs_video_encoder_create(streamEncoder,
+	// 		"streaming_h264", streamEncSettings, nullptr);
+	// if (!h264Streaming)
+	// 	throw "Failed to create streaming h264 encoder "
+	// 	      "(advanced output)";
+	// obs_encoder_release(h264Streaming);
 
 	for (int i = 0; i < 4; i++) {
 		char name[9];

@@ -23,7 +23,7 @@ elseif("${CMAKE_SYSTEM_NAME}" MATCHES "FreeBSD")
 endif()
 
 add_subdirectory(image-source)
-add_subdirectory(obs-x264)
+#add_subdirectory(obs-x264)
 add_subdirectory(obs-libfdk)
 add_subdirectory(obs-ffmpeg)
 add_subdirectory(obs-outputs)

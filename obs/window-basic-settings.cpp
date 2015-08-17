@@ -354,6 +354,17 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 			"hotkey_unregister", ReloadHotkeysIgnore, this);
 
 	LoadSettings(false);
+
+	// Make Stream tab empty
+	ui->streamContainer->setVisible(false);
+
+	// Remove possibility to choose simple output
+	ui->outputMode->setVisible(false);
+	ui->outputModeLabel->setVisible(false);
+
+	// Remove possibility to choose flv output
+	ui->advOutRecTypeContainer->setVisible(false);
+	ui->advOutTabs->removeTab(ui->advOutTabs->indexOf(ui->advOutputStreamTab));
 }
 
 void OBSBasicSettings::SaveCombo(QComboBox *widget, const char *section,
@@ -642,33 +653,6 @@ void OBSBasicSettings::LoadGeneralSettings()
 
 void OBSBasicSettings::LoadStream1Settings()
 {
-	QLayout *layout = ui->streamContainer->layout();
-	obs_service_t *service = main->GetService();
-	const char *type = obs_service_get_type(service);
-
-	loading = true;
-
-	obs_data_t *settings = obs_service_get_settings(service);
-
-	delete streamProperties;
-	streamProperties = new OBSPropertiesView(settings, type,
-			(PropertiesReloadCallback)obs_get_service_properties,
-			170);
-
-	streamProperties->setProperty("changed", QVariant(false));
-	layout->addWidget(streamProperties);
-
-	QObject::connect(streamProperties, SIGNAL(Changed()),
-			this, STREAM1_CHANGED);
-
-	obs_data_release(settings);
-
-	loading = false;
-
-	if (main->StreamingActive()) {
-		ui->streamType->setEnabled(false);
-		ui->streamContainer->setEnabled(false);
-	}
 }
 
 void OBSBasicSettings::LoadRendererList()
@@ -979,15 +963,6 @@ OBSPropertiesView *OBSBasicSettings::CreateEncoderPropertyView(
 
 void OBSBasicSettings::LoadAdvOutputStreamingEncoderProperties()
 {
-	const char *encoder = config_get_string(main->Config(), "AdvOut",
-			"Encoder");
-
-	delete streamEncoderProps;
-	streamEncoderProps = CreateEncoderPropertyView(encoder,
-			"obs-studio/basic/streamEncoder.json");
-	ui->advOutputStreamTab->layout()->addWidget(streamEncoderProps);
-
-	SetComboByValue(ui->advOutEncoder, encoder);
 }
 
 void OBSBasicSettings::LoadAdvOutputRecordingSettings()
@@ -1004,6 +979,8 @@ void OBSBasicSettings::LoadAdvOutputRecordingSettings()
 			"RecTrackIndex");
 
 	int typeIndex = (astrcmpi(type, "FFmpeg") == 0) ? 1 : 0;
+	// Always choose FFmpeg
+	typeIndex = 1;
 	ui->advOutRecType->setCurrentIndex(typeIndex);
 	ui->advOutRecPath->setText(path);
 	ui->advOutRecUseRescale->setChecked(rescale);
@@ -1150,6 +1127,8 @@ void OBSBasicSettings::LoadOutputSettings()
 	const char *mode = config_get_string(main->Config(), "Output", "Mode");
 
 	int modeIdx = astrcmpi(mode, "Advanced") == 0 ? 1 : 0;
+	// Always choose Advanced
+	modeIdx = 1;
 	ui->outputMode->setCurrentIndex(modeIdx);
 
 	LoadSimpleOutputSettings();
@@ -1773,21 +1752,6 @@ void OBSBasicSettings::SaveGeneralSettings()
 
 void OBSBasicSettings::SaveStream1Settings()
 {
-	QString streamType = GetComboData(ui->streamType);
-
-	obs_service_t *oldService = main->GetService();
-	obs_data_t *hotkeyData = obs_hotkeys_save_service(oldService);
-
-	obs_service_t *newService = obs_service_create(QT_TO_UTF8(streamType),
-			"default_service", streamProperties->GetSettings(),
-			hotkeyData);
-
-	obs_data_release(hotkeyData);
-	if (!newService)
-		return;
-
-	main->SetService(newService);
-	main->SaveService();
 }
 
 void OBSBasicSettings::SaveVideoSettings()
@@ -1979,8 +1943,6 @@ void OBSBasicSettings::SaveOutputSettings()
 	SaveEdit(ui->advOutTrack3Name, "AdvOut", "Track3Name");
 	SaveEdit(ui->advOutTrack4Name, "AdvOut", "Track4Name");
 
-	WriteJsonData(streamEncoderProps,
-			"obs-studio/basic/streamEncoder.json");
 	WriteJsonData(recordEncoderProps,
 			"obs-studio/basic/recordEncoder.json");
 	main->ResetOutputs();
@@ -2162,26 +2124,6 @@ void OBSBasicSettings::on_buttonBox_clicked(QAbstractButton *button)
 
 void OBSBasicSettings::on_streamType_currentIndexChanged(int idx)
 {
-	if (loading)
-		return;
-
-	QLayout *layout = ui->streamContainer->layout();
-	QString streamType = ui->streamType->itemData(idx).toString();
-	obs_data_t *settings = obs_service_defaults(QT_TO_UTF8(streamType));
-
-	delete streamProperties;
-	streamProperties = new OBSPropertiesView(settings,
-			QT_TO_UTF8(streamType),
-			(PropertiesReloadCallback)obs_get_service_properties,
-			170);
-
-	streamProperties->setProperty("changed", QVariant(true));
-	layout->addWidget(streamProperties);
-
-	QObject::connect(streamProperties, SIGNAL(Changed()),
-			this, STREAM1_CHANGED);
-
-	obs_data_release(settings);
 }
 
 void OBSBasicSettings::on_simpleOutputBrowse_clicked()
@@ -2229,13 +2171,6 @@ void OBSBasicSettings::on_advOutFFPathBrowse_clicked()
 
 void OBSBasicSettings::on_advOutEncoder_currentIndexChanged(int idx)
 {
-	QString encoder = GetComboData(ui->advOutEncoder);
-
-	delete streamEncoderProps;
-	streamEncoderProps = CreateEncoderPropertyView(QT_TO_UTF8(encoder),
-			"obs-studio/basic/streamEncoder.json", true);
-	ui->advOutputStreamTab->layout()->addWidget(streamEncoderProps);
-
 	UNUSED_PARAMETER(idx);
 }
 

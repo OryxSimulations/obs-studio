@@ -97,7 +97,6 @@ private:
 
 	OBSFFFormatDesc formats;
 
-	OBSPropertiesView *streamProperties = nullptr;
 	OBSPropertiesView *streamEncoderProps = nullptr;
 	OBSPropertiesView *recordEncoderProps = nullptr;
 

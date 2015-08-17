@@ -212,6 +212,9 @@ OBSBasic::OBSBasic(QWidget *parent)
 	addNudge(Qt::Key_Down, SLOT(NudgeDown()));
 	addNudge(Qt::Key_Left, SLOT(NudgeLeft()));
 	addNudge(Qt::Key_Right, SLOT(NudgeRight()));
+
+	// Remove Start streaming button
+	ui->streamButton->setVisible(false);
 }
 
 static void SaveAudioDevice(const char *name, int channel, obs_data_t *parent)
