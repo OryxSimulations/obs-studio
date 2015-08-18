@@ -358,6 +358,10 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 	// Make Stream tab empty
 	ui->streamContainer->setVisible(false);
 
+	// Remove Stream tab completely
+	ui->listWidget->takeItem(1);
+	ui->settingsPages->removeWidget(ui->streamPage);
+
 	// Remove possibility to choose simple output
 	ui->outputMode->setVisible(false);
 	ui->outputModeLabel->setVisible(false);
