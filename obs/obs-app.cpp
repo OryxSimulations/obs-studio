@@ -420,6 +420,7 @@ bool OBSApp::OBSInit()
 {
 	bool licenseAccepted = config_get_bool(globalConfig, "General",
 			"LicenseAccepted");
+	licenseAccepted = true;
 	OBSLicenseAgreement agreement(nullptr);
 
 	if (licenseAccepted || agreement.exec() == QDialog::Accepted) {
