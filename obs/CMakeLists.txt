@@ -82,6 +82,7 @@ elseif(UNIX)
 		${X11_XCB_DEFINITIONS})
 
 	set(obs_PLATFORM_LIBRARIES
+		${OPENGL_LIBRARIES}
 		${XCB_LIBRARIES}
 		${X11_XCB_LIBRARIES}
                 Qt5::X11Extras)
