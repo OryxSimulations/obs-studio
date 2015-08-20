@@ -42,6 +42,7 @@ else() #This needs to change to be more specific to get ready for Wayland
 		${X11_XCB_DEFINITIONS})
 
 	set(libobs-opengl_PLATFORM_DEPS
+		${OPENGL_LIBRARIES}
 		${XCB_LIBRARIES}
 		${X11_XCB_LIBRARIES})
 

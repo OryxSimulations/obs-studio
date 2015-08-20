@@ -54,6 +54,6 @@ endif()
 
 target_link_libraries(glad
 	${glad_PLATFORM_DEPS}
-	${OPENGL_gl_LIBRARY})
+	${OPENGL_LIBRARIES})
 
 install_obs_core(glad)
