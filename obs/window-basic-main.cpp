@@ -59,6 +59,8 @@
 #include <QScreen>
 #include <QWindow>
 
+#include <X11/Xlib.h>
+
 #define PREVIEW_EDGE_SIZE 10
 
 using namespace std;
@@ -738,6 +740,32 @@ void OBSBasic::OBSInit()
 		throw "Failed to initialize libobs";
 	if (!LoadBasicConfig(basicConfigPath))
 		throw "Failed to load basic.ini";
+
+	if (QApplication::arguments().contains("--windowid"))
+	{
+		Display * xdisp = XOpenDisplay(nullptr);
+		int index = QApplication::arguments().lastIndexOf("--windowid");
+		Window windowid;
+		if (index >= 0 && index + 1 < QApplication::arguments().size())
+		{
+			windowid = QString(QApplication::arguments()[index + 1]).toULong();
+
+			Display * xdisp = XOpenDisplay(NULL);
+			if (xdisp)
+			{
+				XWindowAttributes attr;
+				if (XGetWindowAttributes(xdisp, windowid, &attr))
+				{
+					config_set_uint(basicConfig, "Video", "BaseCX", attr.width);
+					config_set_uint(basicConfig, "Video", "BaseCY", attr.height);
+					config_set_uint(basicConfig, "Video", "OutputCX", attr.width);
+					config_set_uint(basicConfig, "Video", "OutputCY", attr.height);
+				}
+				XCloseDisplay(xdisp);
+			}
+		}
+	}
+
 	if (!InitBasicConfigDefaults())
 		throw "Failed to init config defaults";
 	if (!ResetAudio())
