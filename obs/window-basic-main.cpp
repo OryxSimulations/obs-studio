@@ -703,10 +703,13 @@ void OBSBasic::OBSInit()
 		throw "Failed to get scenes.json file path";
 
 	/* make sure it's fully displayed before doing any initialization */
-	if (arguments.contains("--start-minimized"))
-		showMinimized();
-	else
-		show();
+	if (!arguments.contains("--hidden"))
+	{
+		if (arguments.contains("--start-minimized"))
+			showMinimized();
+		else
+			show();
+	}
 
 	int index = arguments.lastIndexOf("--scene");
 	if (index >= 0 && index + 1 < arguments.size())
