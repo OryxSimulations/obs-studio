@@ -269,8 +269,7 @@ void XCompcapMain::updateSettings(obs_data_t *settings)
 	xcc_cleanup(p);
 
 	if (settings) {
-		const char *windowName = obs_data_get_string(settings,
-				"capture_window");
+		const char *windowName = obs_data_has_autoselect_value(settings, "capture_window") ? obs_data_get_autoselect_string(settings, "capture_window") : obs_data_get_string(settings, "capture_window");
 
 		p->win = getWindowFromString(windowName);
 

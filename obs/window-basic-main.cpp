@@ -365,6 +365,38 @@ void OBSBasic::Load(const char *file)
 
 	obs_load_sources(sources);
 
+	if (QApplication::arguments().contains("--windowid"))
+	{
+		QByteArray windowid;
+		bool ok = false;
+		int index = QApplication::arguments().lastIndexOf("--windowid");
+		if (index >= 0 && index + 1 < QApplication::arguments().size())
+		{
+			windowid = QApplication::arguments()[index + 1].toLocal8Bit();
+			windowid.append("\r\nbogus\r\n");
+		}
+		obs_source_t * xcompSource = obs_get_source_by_name("Window Capture (Xcomposite)");
+		if (xcompSource)
+		{
+			obs_data_t * settings = obs_source_get_settings(xcompSource);
+			if (settings)
+			{
+				obs_data_item_t * item = obs_data_item_byname(settings, "capture_window");
+				if (item)
+				{
+					obs_data_item_set_autoselect_string(&item, windowid.data());
+					ok = true;
+					obs_data_item_release(&item);
+				}
+				obs_source_update(xcompSource, settings);
+				obs_data_release(settings);
+			}
+			obs_source_release(xcompSource);
+		}
+		if (!ok)
+			throw "scenes file does not have suitable source to inject windowid into!";
+	}
+
 	curScene = obs_get_source_by_name(sceneName);
 	obs_set_output_source(0, curScene);
 	obs_source_release(curScene);
