@@ -1323,22 +1323,22 @@ void OBSBasic::TimedCheckForUpdates()
 
 void OBSBasic::CheckForUpdates()
 {
-#ifdef UPDATE_SPARKLE
-	trigger_sparkle_update();
-#else
-	ui->actionCheckForUpdates->setEnabled(false);
+// #ifdef UPDATE_SPARKLE
+// 	trigger_sparkle_update();
+// #else
+// 	ui->actionCheckForUpdates->setEnabled(false);
 
-	string versionString("obs-basic ");
-	versionString += App()->GetVersionString();
+// 	string versionString("obs-basic ");
+// 	versionString += App()->GetVersionString();
 
-	QNetworkRequest request;
-	request.setUrl(QUrl("https://obsproject.com/obs2_update/basic.json"));
-	request.setRawHeader("User-Agent", versionString.c_str());
+// 	QNetworkRequest request;
+// 	request.setUrl(QUrl("https://obsproject.com/obs2_update/basic.json"));
+// 	request.setRawHeader("User-Agent", versionString.c_str());
 
-	QNetworkReply *reply = networkManager.get(request);
-	connect(reply, SIGNAL(finished()),
-			this, SLOT(updateFileFinished()));
-#endif
+// 	QNetworkReply *reply = networkManager.get(request);
+// 	connect(reply, SIGNAL(finished()),
+// 			this, SLOT(updateFileFinished()));
+// #endif
 }
 
 #ifdef __APPLE__
