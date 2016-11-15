@@ -218,7 +218,7 @@ static Window getWindowFromString(std::string wstr)
 	std::string wname = wstr.substr(0, lastMark);
 
 	Window matchedNameWin = wid;
-	for (Window cwin: XCompcap::getAllWindows()) {
+	for (Window cwin: XCompcap::getTopLevelWindows()) {
 		std::string cwinname = XCompcap::getWindowName(cwin);
 
 		if (cwin == wid && wname == cwinname)
@@ -281,8 +281,6 @@ void XCompcapMain::updateSettings(obs_data_t *settings)
 		p->swapRedBlue = obs_data_get_bool(settings, "swap_redblue");
 		p->show_cursor = obs_data_get_bool(settings, "show_cursor");
 		p->include_border = obs_data_get_bool(settings, "include_border");
-    blog(LOG_DEBUG, "set window to %d from [%s] (all windows!)", static_cast<int>(p->win), windowName);
-    
 	} else {
 		p->win = prevWin;
 	}
