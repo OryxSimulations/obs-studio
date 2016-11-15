@@ -375,7 +375,6 @@ void OBSBasic::Load(const char *file)
 		if (index >= 0 && index + 1 < QApplication::arguments().size())
 		{
 			windowid = QApplication::arguments()[index + 1].toLocal8Bit();
-			windowid.append("\r\nbogus\r\n");
 		}
 		obs_source_t * xcompSource = obs_get_source_by_name("Window Capture (Xcomposite)");
 		if (xcompSource)
