@@ -1,6 +1,7 @@
 project(obs)
 
 find_package(OpenGL REQUIRED)
+find_package(X11 REQUIRED)
 
 option(ENABLE_UI "Enables the OBS user interfaces" ON)
 if(DISABLE_UI)
@@ -85,6 +86,8 @@ elseif(UNIX)
 
 	set(obs_PLATFORM_LIBRARIES
 		${OPENGL_LIBRARIES}
+		${X11_LIBRARIES}
+		${X11_X11_LIB}
 		${XCB_LIBRARIES}
 		${X11_XCB_LIBRARIES}
                 Qt5::X11Extras)
