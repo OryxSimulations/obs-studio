@@ -34,10 +34,13 @@ target_compile_definitions(glad
 	PRIVATE GLAD_GLAPI_EXPORT_BUILD)
 
 if(NOT MSVC)
-	target_compile_options(glad
-		PRIVATE -DPIC -fvisibility=hidden)
+  set_target_properties(glad PROPERTIES COMPILE_OPTIONS "-DPIC -fvisibility=hidden")
+
+	#target_compile_options(glad
+	#	PRIVATE -DPIC -fvisibility=hidden)
 	if(NOT MINGW)
-		target_compile_options(glad PRIVATE -fPIC)
+		#target_compile_options(glad PRIVATE -fPIC)
+    set_target_properties(glad PROPERTIES COMPILE_OPTIONS "-fPIC")
 	endif()
 endif()
 

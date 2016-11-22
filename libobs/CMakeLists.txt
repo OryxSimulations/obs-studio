@@ -297,17 +297,23 @@ target_compile_definitions(libobs
 		HAVE_OBSCONFIG_H)
 
 if(NOT MSVC)
-	target_compile_options(libobs
-		PUBLIC
-			-mmmx
-			-msse
-			-msse2)
+
+  set_target_properties(libobs PROPERTIES COMPILE_OPTIONS "-mmmx -msse -msse2")
+
+	#target_compile_options(libobs
+	#	PUBLIC
+	#		-mmmx
+	#		-msse
+	#		-msse2)
 endif()
 
 
-target_compile_options(libobs
-	PUBLIC
-		"${THREADS_DEFINITIONS}")
+set_target_properties(libobs PROPERTIES COMPILE_OPTIONS "${THREADS_DEFINITIONS}")
+
+#target_compile_options(libobs
+#	PUBLIC
+#		"${THREADS_DEFINITIONS}")
+
 target_include_directories(libobs
 	PUBLIC
 		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"

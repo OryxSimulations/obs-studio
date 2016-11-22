@@ -56,7 +56,8 @@ target_include_directories(libff
 
 if(NOT MSVC)
         if(NOT MINGW)
-                target_compile_options(libff PRIVATE -fPIC)
+                #target_compile_options(libff PRIVATE -fPIC)
+                set_target_properties(libff PROPERTIES COMPILE_OPTIONS -fPIC)
         endif()
 endif()
 
