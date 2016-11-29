@@ -93,7 +93,7 @@ else()
 	set(OBS_PLUGIN64_DESTINATION "${OBS_LIBRARY64_DESTINATION}/obs-plugins")
 	set(OBS_DATA_DESTINATION "share/obs")
 	set(OBS_CMAKE_DESTINATION "${OBS_LIBRARY_DESTINATION}/cmake")
-	set(OBS_INCLUDE_DESTINATION "include/obs")
+	set(OBS_INCLUDE_DESTINATION "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/obs> $<INSTALL_INTERFACE:include/obs>")
 
 	set(OBS_DATA_PATH "${OBS_DATA_DESTINATION}")
 	set(OBS_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/")
@@ -275,7 +275,11 @@ function(export_obs_core target exportname)
 		ARCHIVE DESTINATION "${OBS_LIBRARY_DESTINATION}"
 		RUNTIME DESTINATION "${OBS_EXECUTABLE_DESTINATION}")
 
-	export(TARGETS ${target} FILE "${CMAKE_CURRENT_BINARY_DIR}/${exportname}Target.cmake")
+	if ("${target}" STREQUAL "libobs") 
+          export(TARGETS "jansson" ${target} FILE "${CMAKE_CURRENT_BINARY_DIR}/${exportname}Target.cmake")
+        else()
+    	  export(TARGETS ${target} FILE "${CMAKE_CURRENT_BINARY_DIR}/${exportname}Target.cmake")
+        endif()
 	export(PACKAGE "${exportname}")
 
 	set(CONF_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -311,7 +315,8 @@ function(install_obs_headers)
 		if(IS_ABSOLUTE "${hdr}")
 			set(subdir)
 		else()
-			get_filename_component(subdir "${hdr}" DIRECTORY)
+			#get_filename_component(subdir "${hdr}" DIRECTORY)
+			get_filename_component(subdir "${hdr}" PATH)
 			if(subdir)
 				set(subdir "/${subdir}")
 			endif()
@@ -368,6 +373,7 @@ function(install_obs_pdb ttype target)
 endfunction()
 
 function(install_obs_core target)
+
 	if(APPLE)
 		set(_bit_suffix "")
 	elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -379,9 +385,9 @@ function(install_obs_core target)
 	if("${ARGV1}" STREQUAL "EXPORT")
 		export_obs_core("${target}" "${ARGV2}")
 	else()
-		install(TARGETS ${target}
+		install(TARGETS ${target} 
 			LIBRARY DESTINATION "${OBS_LIBRARY_DESTINATION}"
-			RUNTIME DESTINATION "${OBS_EXECUTABLE_DESTINATION}")
+			RUNTIME DESTINATION "${OBS_EXECUTABLE_DESTINATION}")               
 	endif()
 
 	add_custom_command(TARGET ${target} POST_BUILD

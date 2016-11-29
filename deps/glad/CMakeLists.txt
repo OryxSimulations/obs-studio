@@ -40,7 +40,9 @@ if(NOT MSVC)
 	#	PRIVATE -DPIC -fvisibility=hidden)
 	if(NOT MINGW)
 		#target_compile_options(glad PRIVATE -fPIC)
-    set_target_properties(glad PROPERTIES COMPILE_OPTIONS "-fPIC")
+    #set_target_properties(glad PROPERTIES COMPILE_OPTIONS "-fPIC")
+                set_property(TARGET glad PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 	endif()
 endif()
 

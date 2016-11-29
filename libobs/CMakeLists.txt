@@ -320,12 +320,12 @@ target_include_directories(libobs
 		"$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/config>"
 		"$<INSTALL_INTERFACE:${OBS_INCLUDE_DESTINATION}>")
 target_link_libraries(libobs
-	PRIVATE
+	#PRIVATE
 		${libobs_PLATFORM_DEPS}
 		${libobs_image_loading_LIBRARIES}
 		${OBS_JANSSON_IMPORT}
 		${FFMPEG_LIBRARIES}
-	PUBLIC
+	#PUBLIC
 		${THREADS_LIBRARIES})
 
 install_obs_core(libobs EXPORT LibObs)

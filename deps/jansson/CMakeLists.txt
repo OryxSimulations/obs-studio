@@ -278,7 +278,8 @@ if (FALSE)
 else ()
 
    add_library (jansson ${C_FILES})
-
+   install (TARGETS jansson DESTINATION "lib" EXPORT "janssonTarget")
+   install (EXPORT "janssonTarget" DESTINATION "lib/jansson") 
 endif ()
 
 # LIBRARY for linux
@@ -473,4 +474,6 @@ if (FALSE)
 endif ()
 
 target_include_directories(jansson
-	PUBLIC src "${CMAKE_CURRENT_BINARY_DIR}/include")
+	PUBLIC 
+          "$<BUILD_INTERFACE:${jansson_SOURCE_DIR}/src>" 
+          "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>")

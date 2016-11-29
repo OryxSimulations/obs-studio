@@ -58,6 +58,7 @@ if(NOT MSVC)
         if(NOT MINGW)
                 #target_compile_options(libff PRIVATE -fPIC)
                 set_target_properties(libff PROPERTIES COMPILE_OPTIONS -fPIC)
+                set_property(TARGET libff PROPERTY POSITION_INDEPENDENT_CODE ON)
         endif()
 endif()
 
